@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Result - Water Footprint</title>
+    <style>
+        body { font-family: Arial; background:#f0f9ff; text-align:center; }
+        table { margin:auto; border-collapse:collapse; width:80%; }
+        td, th { border:1px solid #ccc; padding:10px; }
+        h1 { color:#0077cc; }
+        button { padding:10px 20px; margin-top:20px; background:#0077cc; color:white; border:none; border-radius:8px; cursor:pointer; }
+        ul { text-align:left; display:inline-block; }
+    </style>
+</head>
+<body>
+<h1>💧 Your Water Footprint Result</h1>
+<table>
+<tr><th>Activity</th><th>Quantity</th><th>Water Used (L)</th></tr>
+{% for a,q,w in details %}
+<tr><td>{{ a }}</td><td>{{ q }}</td><td>{{ "%.1f"|format(w) }}</td></tr>
+{% endfor %}
+</table>
+<h2>Total Water Used: {{ "%.1f"|format(total) }} Litres</h2>
+<h3>💡 Top Tips:</h3>
+<ul>
+{% for tip in tips %}
+<li>{{ tip }}</li>
+{% endfor %}
+</ul>
+{% if badges %}
+<h3>🏅 Badges Earned:</h3>
+<ul>
+{% for badge in badges %}
+<li>{{ badge }}</li>
+{% endfor %}
+</ul>
+{% endif %}
+<a href="{{ url_for('index') }}"><button>Go Back</button></a>
+<a href="{{ url_for('dashboard') }}"><button>View Dashboard</button></a>
+</body>
+</html>
