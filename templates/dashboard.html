@@ -1,50 +1,24 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Dashboard - Water Tracker</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body { font-family: Arial; background: linear-gradient(#e0f7ff, #ffffff); text-align:center; }
-        h1 { color:#0077cc; }
-        canvas { background:white; border-radius:15px; padding:20px; box-shadow:0 0 15px #ccc; margin-top:20px; }
-        .badge { display:inline-block; padding:8px 15px; margin:5px; border-radius:10px; background:#0077cc; color:white; }
-        .card { display:inline-block; background:white; padding:20px; margin:10px; border-radius:15px; box-shadow:0 0 15px #ccc; width:250px; vertical-align:top; }
-    </style>
+<title>Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+body { font-family: Arial; background:#e0f7ff; text-align:center; }
+h1 { color:#0077cc; }
+canvas { background:white; border-radius:10px; margin-top:20px;}
+.button { background:#0077cc; color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer;}
+</style>
 </head>
 <body>
-<h1>💧 Water Tracker Dashboard</h1>
+<h1>💧 Water Footprint Dashboard</h1>
+<h2>Total Water Used: {{total|round(1)}} L</h2>
+<h3>Badge Earned: {{badge}}</h3>
+<h3>Community Average: {{community_avg}} L</h3>
 
-<div class="card">
-<h3>💧 Total Usage</h3>
-<p>{{ "%.1f"|format(total) }} Litres</p>
-</div>
-
-<div class="card">
-<h3>🏅 Badges</h3>
-{% for badge in badges %}
-<div class="badge">{{ badge }}</div>
-{% endfor %}
-</div>
-
-<div class="card">
-<h3>🌍 Community Avg</h3>
-<p>{{ community_avg }} Litres</p>
-</div>
-
-<div>
-<canvas id="chart" width="600" height="400"></canvas>
-</div>
-
-<div class="card">
-<h3>❓ Mini Quiz</h3>
-<p>{{ quiz.q }}</p>
-<p><b>Answer:</b> {{ quiz.a }}</p>
-</div>
-
-<a href="{{ url_for('index') }}"><button style="margin-top:20px; padding:10px 25px; background:#0077cc; color:white; border:none; border-radius:8px;">Go Back</button></a>
-
+<canvas id="barChart" width="400" height="200"></canvas>
 <script>
-const ctx = document.getElementById('chart').getContext('2d');
+const ctx = document.getElementById('barChart').getContext('2d');
 const chart = new Chart(ctx, {
     type: 'bar',
     data: {
@@ -52,20 +26,19 @@ const chart = new Chart(ctx, {
         datasets: [{
             label: 'Water Used (L)',
             data: {{ values|tojson }},
-            backgroundColor: 'rgba(0, 119, 204, 0.7)',
-            borderColor: 'rgba(0, 119, 204,1)',
+            backgroundColor: 'rgba(0,123,255,0.5)',
+            borderColor: 'rgba(0,123,255,1)',
             borderWidth: 1
         }]
     },
-    options: {
-        responsive:true,
-        plugins: {
-            legend: { display:false },
-            title: { display:true, text:'Water Usage by Activity' }
-        },
-        scales: { y: { beginAtZero:true } }
-    }
+    options: { scales: { y: { beginAtZero:true } } }
 });
 </script>
+
+<h3>💡 Daily Quiz</h3>
+<p>{{quiz.q}}</p>
+<p><strong>Answer:</strong> {{quiz.a}}</p>
+
+<br><a href="/"><button class="button">Go Back</button></a>
 </body>
 </html>

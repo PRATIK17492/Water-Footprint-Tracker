@@ -3,14 +3,13 @@ from flask import Flask, render_template, request, session
 from datetime import timedelta
 import random
 
-# Initialize Flask app
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", "heTturch9abXD3u3p08YaaWhk5AYWhy0")  # Secret key for sessions
+app.secret_key = os.environ.get("SECRET_KEY", "heTturch9abXD3u3p08YaaWhk5AYWhy0")
 app.permanent_session_lifetime = timedelta(days=7)
 
 # --- Water usage data in Litres ---
 WATER_DATA = {
-    "Shower (per hour)": 9*60,       # 9 L per minute * 60 = 540 L/hour
+    "Shower (per hour)": 9*60,
     "Washing machine (per load)": 70,
     "Toilet flush (per flush)": 6,
     "1 kg Rice": 2500,
@@ -45,18 +44,16 @@ QUIZ = [
     {"q": "True or False: Flushing toilets uses more water than one shower.", "a": "False"}
 ]
 
-# --- Routes ---
-
 @app.route('/', methods=['GET'])
 def index():
-    """Home page with input form"""
     return render_template("index.html", water_data=WATER_DATA)
 
 @app.route('/result', methods=['POST'])
 def result():
-    """Calculate total water usage and show result page"""
     total = 0
     details = []
+
+    # Standard activities
     for activity, value in WATER_DATA.items():
         qty_str = request.form.get(activity, '0')
         try:
@@ -67,43 +64,60 @@ def result():
             used = qty * value
             total += used
             details.append((activity, qty, used))
-    
+
+    # Other activity
+    other_name = request.form.get("other_activity_name", "").strip()
+    try:
+        other_value = float(request.form.get("other_activity_value", 0))
+        other_qty = float(request.form.get("other_activity_qty", 0))
+    except ValueError:
+        other_value = 0
+        other_qty = 0
+
+    if other_name and other_value > 0 and other_qty > 0:
+        used = other_value * other_qty
+        total += used
+        details.append((other_name, other_qty, used))
+        TIPS[other_name] = "Try to reduce water use for this activity if possible."
+
     # Top 3 tips
     tips_list = [TIPS[a] for a, _, _ in sorted(details, key=lambda x: -x[2])[:3]]
 
-    # Earned badges
-    earned_badges = [name for name, threshold in BADGES.items() if total <= threshold]
+    # Earned badge logic (smaller water = higher badge)
+    earned_badge = None
+    for name, threshold in sorted(BADGES.items(), key=lambda x: x[1]):
+        if total <= threshold:
+            earned_badge = name
+            break
 
-    # Save in session for dashboard
+    # Save session for dashboard
     session['last_total'] = total
     session['last_details'] = details
     session['last_tips'] = tips_list
-    session['last_badges'] = earned_badges
+    session['last_badge'] = earned_badge
 
-    return render_template("result.html", total=total, details=details, tips=tips_list, badges=earned_badges)
+    return render_template("result.html", total=total, details=details, tips=tips_list, badge=earned_badge)
 
 @app.route('/dashboard')
 def dashboard():
-    """Show interactive dashboard with chart, badges, quiz, and community stats"""
     total = session.get('last_total', 0)
     details = session.get('last_details', [])
-    badges = session.get('last_badges', [])
+    badge = session.get('last_badge', None)
 
-    # Chart data
     labels = [d[0] for d in details]
     values = [d[2] for d in details]
 
-    # Community stats (demo)
+    # Random community average
     community_avg = random.randint(int(total*0.8), int(total*1.2))
 
-    # Random quiz question
+    # Random quiz
     quiz_q = random.choice(QUIZ)
 
     return render_template("dashboard.html",
                            total=total,
                            labels=labels,
                            values=values,
-                           badges=badges,
+                           badge=badge,
                            community_avg=community_avg,
                            quiz=quiz_q)
 
