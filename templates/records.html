@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Records - Water Footprint Tracker</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #1a73e8;
+            --primary-light: #4285f4;
+            --secondary: #00bcd4;
+            --accent: #00e5ff;
+            --background: #f0f9ff;
+            --card-bg: #ffffff;
+            --text: #202124;
+            --text-light: #5f6368;
+            --success: #34a853;
+            --warning: #fbbc05;
+            --error: #ea4335;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --radius: 16px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #e0f7ff 0%, #f0f9ff 100%);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 15px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Top Navigation */
+        .top-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 0 10px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .nav-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: var(--card-bg);
+            border: 2px solid var(--primary);
+            border-radius: var(--radius);
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+
+        .back-btn:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateX(-5px);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: var(--text);
+            font-size: 0.95rem;
+        }
+
+        .logout-btn {
+            padding: 8px 14px;
+            background: var(--error);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .logout-btn:hover {
+            background: #d32f2f;
+            transform: translateY(-2px);
+        }
+
+        /* Header */
+        .dashboard-header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding: 20px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: var(--radius);
+            color: white;
+            box-shadow: var(--shadow);
+        }
+
+        .dashboard-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .dashboard-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .dashboard-subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        /* Main Content Layout */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .left-column, .right-column {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 20px;
+            transition: transform 0.3s ease;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .card-icon {
+            font-size: 1.3rem;
+            color: var(--primary);
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        /* Records Specific Styles */
+        .record-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .record-item:last-child {
+            border-bottom: none;
+        }
+
+        .record-label {
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .record-value {
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .achievement-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: var(--radius);
+            text-align: center;
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .achievement-icon {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+
+        .achievement-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .achievement-label {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .progress-ring {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 15px;
+        }
+
+        .progress-circle {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: conic-gradient(var(--primary) 0% {{ records_data.efficiency_score }}%, #e8eaed {{ records_data.efficiency_score }}% 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 18px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-icon {
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            line-height: 1.2;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            font-weight: 500;
+            line-height: 1.3;
+        }
+
+        /* Water Animation */
+        .water-droplet {
+            position: fixed;
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, rgba(26, 115, 232, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: float 8s ease-in-out infinite;
+            z-index: -1;
+        }
+
+        .water-droplet:nth-child(1) {
+            top: 5%;
+            left: 3%;
+            animation-delay: 0s;
+        }
+
+        .water-droplet:nth-child(2) {
+            top: 70%;
+            right: 5%;
+            animation-delay: 2s;
+        }
+
+        .water-droplet:nth-child(3) {
+            bottom: 10%;
+            left: 10%;
+            animation-delay: 4s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) scale(1); }
+            50% { transform: translateY(-15px) scale(1.03); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .top-nav {
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            .nav-buttons {
+                justify-content: center;
+            }
+            
+            .user-info {
+                justify-content: center;
+            }
+            
+            .dashboard-title {
+                font-size: 1.6rem;
+            }
+            
+            .dashboard-icon {
+                font-size: 1.8rem;
+            }
+            
+            .achievement-card {
+                min-height: 160px;
+                padding: 15px;
+            }
+            
+            .achievement-icon {
+                font-size: 1.8rem;
+            }
+            
+            .achievement-value {
+                font-size: 1.7rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 0 5px;
+            }
+            
+            .top-nav {
+                padding: 0 5px;
+            }
+            
+            .nav-buttons {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .back-btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .dashboard-header {
+                padding: 15px;
+            }
+            
+            .dashboard-title {
+                font-size: 1.4rem;
+            }
+            
+            .dashboard-subtitle {
+                font-size: 0.9rem;
+            }
+            
+            .card {
+                padding: 15px;
+            }
+            
+            .stat-card {
+                padding: 15px;
+                min-height: 110px;
+            }
+            
+            .stat-icon {
+                font-size: 1.6rem;
+            }
+            
+            .stat-number {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated water droplets -->
+    <div class="water-droplet"></div>
+    <div class="water-droplet"></div>
+    <div class="water-droplet"></div>
+
+    <div class="container">
+        <!-- Top Navigation -->
+        <div class="top-nav">
+            <div class="nav-buttons">
+                <a href="/index" class="back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to Main
+                </a>
+                <a href="/dashboard" class="back-btn">
+                    <i class="fas fa-chart-bar"></i>
+                    Dashboard
+                </a>
+                <a href="/history" class="back-btn">
+                    <i class="fas fa-history"></i>
+                    History
+                </a>
+            </div>
+            
+            <div class="user-info">
+                <div class="user-name">Welcome, {{ session.user_data.name }}!</div>
+                <a href="/logout" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </a>
+            </div>
+        </div>
+
+        <!-- Header -->
+        <div class="dashboard-header">
+            <i class="fas fa-trophy dashboard-icon"></i>
+            <h1 class="dashboard-title">My Records & Achievements</h1>
+            <p class="dashboard-subtitle">Celebrate your water conservation milestones</p>
+        </div>
+
+        <!-- Key Achievements -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">🔥</div>
+                <div class="stat-number">{{ records_data.current_streak }}</div>
+                <div class="stat-label">Current Streak</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">💧</div>
+                <div class="stat-number">{{ records_data.total_water_saved|round(1) }} L</div>
+                <div class="stat-label">Total Water Saved</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">🏆</div>
+                <div class="stat-number">{{ records_data.badges_earned }}</div>
+                <div class="stat-label">Badges Earned</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">📊</div>
+                <div class="stat-number">{{ records_data.efficiency_score|round(0) }}%</div>
+                <div class="stat-label">Efficiency Score</div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Left Column -->
+            <div class="left-column">
+                <!-- Usage Records -->
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-chart-line card-icon"></i>
+                        <h2 class="card-title">Usage Records</h2>
+                    </div>
+                    <div class="record-item">
+                        <span class="record-label">Total Tracking Days</span>
+                        <span class="record-value">{{ records_data.total_tracking_days }}</span>
+                    </div>
+                    <div class="record-item">
+                        <span class="record-label">Consecutive Days</span>
+                        <span class="record-value">{{ records_data.consecutive_days }}</span>
+                    </div>
+                    <div class="record-item">
+                        <span class="record-label">Categories Used</span>
+                        <span class="record-value">{{ records_data.total_categories }}/6</span>
+                    </div>
+                    <div class="record-item">
+                        <span class="record-label">Weekly Average</span>
+                        <span class="record-value">{{ weekly_avg|round(1) }} L</span>
+                    </div>
+                    <div class="record-item">
+                        <span class="record-label">Monthly Average</span>
+                        <span class="record-value">{{ monthly_avg|round(1) }} L</span>
+                    </div>
+                </div>
+
+                <!-- Conservation Achievements -->
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-leaf card-icon"></i>
+                        <h2 class="card-title">Conservation Achievements</h2>
+                    </div>
+                    <div class="record-item">
+                        <span class="record-label">Total Water Saved</span>
+                        <span class="record-value">{{ records_data.total_water_saved|round(1) }} L</span>
+                    </div>
+                    <div class="record-item">
+                        <span class="record-label">Max Daily Saving</span>
+                        <span class="record-value">{{ records_data.max_daily_saving|round(1) }} L</span>
+                    </div>
+                    <div class="record-item">
+                        <span class="record-label">Current Efficiency</span>
+                        <span class="record-value">{{ records_data.efficiency_score|round(1) }}%</span>
+                    </div>
+                    <div class="record-item">
+                        <span class="record-label">Badges Collected</span>
+                        <span class="record-value">{{ records_data.badges_earned }}/10</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="right-column">
+                <!-- Efficiency Achievement -->
+                <div class="achievement-card">
+                    <div class="progress-ring">
+                        <div class="progress-circle">
+                            <div class="progress-text">{{ records_data.efficiency_score|round(0) }}%</div>
+                        </div>
+                    </div>
+                    <div class="achievement-value">Efficiency Score</div>
+                    <div class="achievement-label">
+                        {% if records_data.efficiency_score >= 80 %}
+                        Excellent! Keep up the great work!
+                        {% elif records_data.efficiency_score >= 60 %}
+                        Good job! You're saving water effectively!
+                        {% else %}
+                        Keep tracking to improve your score!
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Water Saving Achievement -->
+                <div class="achievement-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                    <div class="achievement-icon">💧</div>
+                    <div class="achievement-value">{{ records_data.total_water_saved|round(0) }}L</div>
+                    <div class="achievement-label">Total Water Saved</div>
+                    <div style="margin-top: 10px; font-size: 0.9rem;">
+                        {% if records_data.total_water_saved > 5000 %}
+                        🌍 Conservation Hero!
+                        {% elif records_data.total_water_saved > 1000 %}
+                        🌱 Making a real impact!
+                        {% else %}
+                        Every drop counts! 💪
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Streak Achievement -->
+                <div class="achievement-card" style="background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);">
+                    <div class="achievement-icon">🔥</div>
+                    <div class="achievement-value">{{ records_data.current_streak }}</div>
+                    <div class="achievement-label">Day Streak</div>
+                    <div style="margin-top: 10px; font-size: 0.9rem;">
+                        {% if records_data.current_streak >= 30 %}
+                        🎯 Habit Master!
+                        {% elif records_data.current_streak >= 7 %}
+                        📊 Consistent Tracker!
+                        {% else %}
+                        Keep the streak going!
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Add animations to page elements
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animate stat cards
+            const statCards = document.querySelectorAll('.stat-card');
+            statCards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 150);
+            });
+
+            // Animate main cards
+            const mainCards = document.querySelectorAll('.card');
+            mainCards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(15px)';
+                
+                setTimeout(() => {
+                    card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, 600 + (index * 100));
+            });
+
+            // Animate achievement cards
+            const achievementCards = document.querySelectorAll('.achievement-card');
+            achievementCards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'scale(0.8)';
+                
+                setTimeout(() => {
+                    card.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'scale(1)';
+                }, 1000 + (index * 200));
+            });
+
+            // Animate header
+            const header = document.querySelector('.dashboard-header');
+            header.style.opacity = '0';
+            header.style.transform = 'scale(0.95)';
+            
+            setTimeout(() => {
+                header.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+                header.style.opacity = '1';
+                header.style.transform = 'scale(1)';
+            }, 300);
+        });
+    </script>
+</body>
+</html>

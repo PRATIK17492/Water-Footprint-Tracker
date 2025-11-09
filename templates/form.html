@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ category.title() }} - Water Footprint Tracker</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #1a73e8;
+            --primary-light: #4285f4;
+            --secondary: #00bcd4;
+            --accent: #00e5ff;
+            --background: #f0f9ff;
+            --card-bg: #ffffff;
+            --text: #202124;
+            --text-light: #5f6368;
+            --success: #34a853;
+            --warning: #fbbc05;
+            --error: #ea4335;
+            --orange: #e67e22;
+            --red: #e74c3c;
+            --blue: #3498db;
+            --dark-blue: #2980b9;
+            --purple: #9b59b6;
+            --dark-purple: #8e44ad;
+            --teal: #00bcd4;
+            --dark-teal: #0097a7;
+            --pink: #e84393;
+            --dark-pink: #c2185b;
+            --green: #00cec9;
+            --dark-green: #00b894;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --radius: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #e0f7ff 0%, #f0f9ff 100%);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 20px;
+            background: white;
+            border: 2px solid var(--primary);
+            border-radius: var(--radius);
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+        }
+
+        .back-btn:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateX(-5px);
+        }
+
+        .category-header {
+            text-align: center;
+            flex: 1;
+        }
+
+        .category-icon {
+            font-size: 3rem;
+            background: linear-gradient(135deg, 
+                {% if category == 'cooking' %}#e67e22, #e74c3c
+                {% elif category == 'household' %}#3498db, #2980b9
+                {% elif category == 'washing' %}#9b59b6, #8e44ad
+                {% elif category == 'bathroom' %}#00bcd4, #0097a7
+                {% elif category == 'laundry' %}#e84393, #c2185b
+                {% else %}#00cec9, #00b894{% endif %}
+            );
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .category-title {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, 
+                {% if category == 'cooking' %}#e67e22, #e74c3c
+                {% elif category == 'household' %}#3498db, #2980b9
+                {% elif category == 'washing' %}#9b59b6, #8e44ad
+                {% elif category == 'bathroom' %}#00bcd4, #0097a7
+                {% elif category == 'laundry' %}#e84393, #c2185b
+                {% else %}#00cec9, #00b894{% endif %}
+            );
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .category-description {
+            font-size: 1.1rem;
+            color: var(--text-light);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            padding: 30px;
+            margin-bottom: 30px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .card-icon {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .activity-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .activity-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            padding: 25px;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .activity-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(135deg, 
+                {% if category == 'cooking' %}#e67e22, #e74c3c
+                {% elif category == 'household' %}#3498db, #2980b9
+                {% elif category == 'washing' %}#9b59b6, #8e44ad
+                {% elif category == 'bathroom' %}#00bcd4, #0097a7
+                {% elif category == 'laundry' %}#e84393, #c2185b
+                {% else %}#00cec9, #00b894{% endif %}
+            );
+        }
+
+        .activity-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        .activity-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .activity-icon {
+            font-size: 1.3rem;
+            color: {% if category == 'cooking' %}#e67e22
+                {% elif category == 'household' %}#3498db
+                {% elif category == 'washing' %}#9b59b6
+                {% elif category == 'bathroom' %}#00bcd4
+                {% elif category == 'laundry' %}#e84393
+                {% else %}#00cec9{% endif %};
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 10px;
+        }
+
+        .activity-info {
+            flex: 1;
+        }
+
+        .activity-name {
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+
+        .activity-description {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 10px;
+        }
+
+        .activity-rate {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            padding: 5px 10px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            display: inline-block;
+            font-weight: 500;
+        }
+
+        .form-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e8eaed;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .label-icon {
+            color: {% if category == 'cooking' %}#e67e22
+                {% elif category == 'household' %}#3498db
+                {% elif category == 'washing' %}#9b59b6
+                {% elif category == 'bathroom' %}#00bcd4
+                {% elif category == 'laundry' %}#e84393
+                {% else %}#00cec9{% endif %};
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e8eaed;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+            background: white;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: {% if category == 'cooking' %}#e67e22
+                {% elif category == 'household' %}#3498db
+                {% elif category == 'washing' %}#9b59b6
+                {% elif category == 'bathroom' %}#00bcd4
+                {% elif category == 'laundry' %}#e84393
+                {% else %}#00cec9{% endif %};
+            box-shadow: 0 0 0 3px 
+                {% if category == 'cooking' %}rgba(230, 126, 34, 0.1)
+                {% elif category == 'household' %}rgba(52, 152, 219, 0.1)
+                {% elif category == 'washing' %}rgba(155, 89, 182, 0.1)
+                {% elif category == 'bathroom' %}rgba(0, 188, 212, 0.1)
+                {% elif category == 'laundry' %}rgba(232, 67, 147, 0.1)
+                {% else %}rgba(0, 206, 201, 0.1){% endif %};
+        }
+
+        .input-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+        .input-row .form-group {
+            flex: 1;
+        }
+
+        .unit-hint {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        .efficiency-section {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border-left: 4px solid var(--success);
+        }
+
+        .efficiency-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--success);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .efficiency-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+        }
+
+        .efficiency-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: white;
+            border: 1px solid #e8eaed;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .efficiency-option:hover {
+            border-color: var(--success);
+        }
+
+        .efficiency-option.selected {
+            background: var(--success);
+            color: white;
+            border-color: var(--success);
+        }
+
+        .additional-notes {
+            margin-top: 15px;
+        }
+
+        .notes-textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 15px 30px;
+            background: {% if category == 'cooking' %}#e67e22
+                {% elif category == 'household' %}#3498db
+                {% elif category == 'washing' %}#9b59b6
+                {% elif category == 'bathroom' %}#00bcd4
+                {% elif category == 'laundry' %}#e84393
+                {% else %}#00cec9{% endif %};
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            background: {% if category == 'cooking' %}#d35400
+                {% elif category == 'household' %}#2980b9
+                {% elif category == 'washing' %}#8e44ad
+                {% elif category == 'bathroom' %}#0097a7
+                {% elif category == 'laundry' %}#c2185b
+                {% else %}#00b894{% endif %};
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--accent);
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 40px;
+            flex-wrap: wrap;
+        }
+
+        .tips-section {
+            background: linear-gradient(135deg, 
+                {% if category == 'cooking' %}#e67e22, #e74c3c
+                {% elif category == 'household' %}#3498db, #2980b9
+                {% elif category == 'washing' %}#9b59b6, #8e44ad
+                {% elif category == 'bathroom' %}#00bcd4, #0097a7
+                {% elif category == 'laundry' %}#e84393, #c2185b
+                {% else %}#00cec9, #00b894{% endif %}
+            );
+            color: white;
+            padding: 30px;
+            border-radius: 20px;
+            margin-top: 40px;
+            box-shadow: var(--shadow);
+        }
+
+        .tips-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+        }
+
+        .tip-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .tip-icon {
+            margin-top: 2px;
+            color: var(--warning);
+            font-size: 1.1rem;
+        }
+
+        .tip-content {
+            flex: 1;
+        }
+
+        .tip-activity {
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 1.1rem;
+        }
+
+        .water-wave {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            overflow: hidden;
+            line-height: 0;
+            z-index: -1;
+        }
+
+        .water-wave svg {
+            position: relative;
+            display: block;
+            width: calc(100% + 1.3px);
+            height: 150px;
+        }
+
+        .water-wave .shape-fill {
+            fill: rgba(26, 115, 232, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .activity-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .input-row {
+                flex-direction: column;
+            }
+            
+            .btn-container {
+                flex-direction: column;
+            }
+            
+            .efficiency-options {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Custom checkbox styles */
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+        }
+
+        .checkbox-group label {
+            margin-bottom: 0;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="water-wave">
+        <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+            <path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z" opacity=".25" class="shape-fill"></path>
+            <path d="M0,0V15.81C13,36.92,27.64,56.86,47.69,72.05,99.41,111.27,165,111,224.58,91.58c31.15-10.15,60.09-26.07,89.67-39.8,40.92-19,84.73-46,130.83-49.67,36.26-2.85,70.9,9.42,98.6,31.56,31.77,25.39,62.32,62,103.63,73,40.44,10.79,81.35-6.69,119.13-24.28s75.16-39,116.92-43.05c59.73-5.85,113.28,22.88,168.9,38.84,30.2,8.66,59,6.17,87.09-7.5,22.43-10.89,48-26.93,60.65-49.24V0Z" opacity=".5" class="shape-fill"></path>
+            <path d="M0,0V5.63C149.93,59,314.09,71.32,475.83,42.57c43-7.64,84.23-20.12,127.61-26.46,59-8.63,112.48,12.24,165.56,35.4C827.93,77.22,886,95.24,951.2,90c86.53-7,172.46-45.71,248.8-84.81V0Z" class="shape-fill"></path>
+        </svg>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <a href="/index" class="back-btn">
+                <i class="fas fa-arrow-left"></i>
+                Back to Main
+            </a>
+            
+            <div class="category-header">
+                <i class="fas fa-{{ 'utensils' if category == 'cooking' else 'home' if category == 'household' else 'car' if category == 'washing' else 'bath' if category == 'bathroom' else 'tshirt' if category == 'laundry' else 'plus' }} category-icon"></i>
+                <h1 class="category-title">{{ category.title() }} Activities</h1>
+                <p class="category-description">
+                    Track your water usage for {{ category }} activities. Fill in the details below for accurate water footprint calculation.
+                </p>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-calculator card-icon"></i>
+                <h2 class="card-title">Track Your Water Usage</h2>
+            </div>
+            
+            <form method="POST" action="/result">
+                <input type="hidden" name="category" value="{{ category }}">
+                
+                <div class="activity-grid">
+                    {% for activity, data in activities.items() %}
+                    <div class="activity-card">
+                        <div class="activity-header">
+                            <div class="activity-icon">
+                                <i class="fas fa-{{ data.icon }}"></i>
+                            </div>
+                            <div class="activity-info">
+                                <div class="activity-name">{{ activity }}</div>
+                                <div class="activity-description">{{ data.description }}</div>
+                                <div class="activity-rate">Base rate: {{ data.rate }} {{ data.unit }}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-section">
+                            <!-- Quantity and Duration -->
+                            <div class="input-row">
+                                <div class="form-group">
+                                    <label>
+                                        <i class="fas fa-ruler label-icon"></i>
+                                        Quantity
+                                    </label>
+                                    <input type="text" name="{{ activity }}_qty" placeholder="e.g., {% if 'min' in data.unit %}15 min{% elif 'kg' in data.unit %}2 kg{% else %}3 times{% endif %}" required>
+                                    <div class="unit-hint">
+                                        {% if 'min' in data.unit %}Enter time (minutes, hours){% elif 'kg' in data.unit %}Enter weight (kg, g, lbs){% else %}Enter quantity with unit{% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>
+                                        <i class="fas fa-clock label-icon"></i>
+                                        Duration
+                                    </label>
+                                    <input type="text" name="{{ activity }}_duration" placeholder="e.g., 30 min" value="{% if 'min' in data.unit %}15{% else %}1{% endif %}">
+                                    <div class="unit-hint">How long does this activity take?</div>
+                                </div>
+                            </div>
+
+                            <!-- Frequency and Pattern -->
+                            <div class="input-row">
+                                <div class="form-group">
+                                    <label>
+                                        <i class="fas fa-redo label-icon"></i>
+                                        Frequency
+                                    </label>
+                                    <input type="text" name="{{ activity }}_freq" placeholder="e.g., 2" value="1" required>
+                                    <div class="unit-hint">How many times per day/week?</div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>
+                                        <i class="fas fa-calendar label-icon"></i>
+                                        Period
+                                    </label>
+                                    <select name="{{ activity }}_period">
+                                        <option value="daily">Daily</option>
+                                        <option value="weekly">Weekly</option>
+                                        <option value="monthly">Monthly</option>
+                                        <option value="yearly">Yearly</option>
+                                    </select>
+                                    <div class="unit-hint">How often do you do this?</div>
+                                </div>
+                            </div>
+
+                            <!-- Efficiency Options -->
+                            <div class="efficiency-section">
+                                <div class="efficiency-title">
+                                    <i class="fas fa-leaf"></i>
+                                    Water Efficiency
+                                </div>
+                                <div class="efficiency-options">
+                                    {% if category == 'bathroom' %}
+                                    <div class="efficiency-option" onclick="toggleEfficiency(this, '{{ activity }}_low_flow')">
+                                        <input type="checkbox" name="{{ activity }}_low_flow" value="1" style="display: none;">
+                                        <i class="fas fa-faucet"></i>
+                                        Low-flow fixture
+                                    </div>
+                                    <div class="efficiency-option" onclick="toggleEfficiency(this, '{{ activity }}_short_duration')">
+                                        <input type="checkbox" name="{{ activity }}_short_duration" value="1" style="display: none;">
+                                        <i class="fas fa-hourglass-half"></i>
+                                        Short duration
+                                    </div>
+                                    {% elif category == 'laundry' %}
+                                    <div class="efficiency-option" onclick="toggleEfficiency(this, '{{ activity }}_full_load')">
+                                        <input type="checkbox" name="{{ activity }}_full_load" value="1" style="display: none;">
+                                        <i class="fas fa-weight-hanging"></i>
+                                        Full load
+                                    </div>
+                                    <div class="efficiency-option" onclick="toggleEfficiency(this, '{{ activity }}_eco_mode')">
+                                        <input type="checkbox" name="{{ activity }}_eco_mode" value="1" style="display: none;">
+                                        <i class="fas fa-leaf"></i>
+                                        Eco mode
+                                    </div>
+                                    {% elif category == 'cooking' %}
+                                    <div class="efficiency-option" onclick="toggleEfficiency(this, '{{ activity }}_measured_water')">
+                                        <input type="checkbox" name="{{ activity }}_measured_water" value="1" style="display: none;">
+                                        <i class="fas fa-ruler"></i>
+                                        Measured water
+                                    </div>
+                                    <div class="efficiency-option" onclick="toggleEfficiency(this, '{{ activity }}_reused_water')">
+                                        <input type="checkbox" name="{{ activity }}_reused_water" value="1" style="display: none;">
+                                        <i class="fas fa-recycle"></i>
+                                        Reused water
+                                    </div>
+                                    {% else %}
+                                    <div class="efficiency-option" onclick="toggleEfficiency(this, '{{ activity }}_efficient')">
+                                        <input type="checkbox" name="{{ activity }}_efficient" value="1" style="display: none;">
+                                        <i class="fas fa-leaf"></i>
+                                        Efficient method
+                                    </div>
+                                    <div class="efficiency-option" onclick="toggleEfficiency(this, '{{ activity }}_water_saving')">
+                                        <input type="checkbox" name="{{ activity }}_water_saving" value="1" style="display: none;">
+                                        <i class="fas fa-tint"></i>
+                                        Water saving
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Additional Notes -->
+                            <div class="form-group additional-notes">
+                                <label>
+                                    <i class="fas fa-sticky-note label-icon"></i>
+                                    Additional Notes (Optional)
+                                </label>
+                                <textarea name="{{ activity }}_notes" class="notes-textarea" placeholder="Any special conditions, equipment used, or other details..."></textarea>
+                            </div>
+
+                            <!-- Water Source -->
+                            <div class="form-group">
+                                <label>
+                                    <i class="fas fa-water label-icon"></i>
+                                    Water Source
+                                </label>
+                                <select name="{{ activity }}_source">
+                                    <option value="municipal">Municipal Supply</option>
+                                    <option value="well">Well Water</option>
+                                    <option value="rainwater">Rainwater Harvesting</option>
+                                    <option value="recycled">Recycled Water</option>
+                                    <option value="other">Other Source</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Custom Activity Section -->
+                <div class="activity-card" style="grid-column: 1 / -1;">
+                    <div class="activity-header">
+                        <div class="activity-icon">
+                            <i class="fas fa-plus"></i>
+                        </div>
+                        <div class="activity-info">
+                            <div class="activity-name">Custom Activity</div>
+                            <div class="activity-description">Add any other water usage activity not listed above</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <div class="input-row">
+                            <div class="form-group">
+                                <label>
+                                    <i class="fas fa-tag label-icon"></i>
+                                    Activity Name
+                                </label>
+                                <input type="text" name="custom_activity_name" placeholder="e.g., Fish Pond Maintenance">
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    <i class="fas fa-tint label-icon"></i>
+                                    Water Usage (L)
+                                </label>
+                                <input type="number" step="0.1" name="custom_activity_water" placeholder="e.g., 50">
+                            </div>
+                        </div>
+                        
+                        <div class="input-row">
+                            <div class="form-group">
+                                <label>
+                                    <i class="fas fa-redo label-icon"></i>
+                                    Frequency
+                                </label>
+                                <input type="text" name="custom_activity_freq" placeholder="e.g., 2 times weekly">
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    <i class="fas fa-clock label-icon"></i>
+                                    Duration
+                                </label>
+                                <input type="text" name="custom_activity_duration" placeholder="e.g., 1 hour">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="btn-container">
+                    <button type="submit" class="btn">
+                        <i class="fas fa-calculator"></i>
+                        Calculate Total Water Footprint
+                    </button>
+                    <button type="reset" class="btn btn-secondary">
+                        <i class="fas fa-undo"></i>
+                        Clear All Fields
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Water Saving Tips -->
+        <div class="tips-section">
+            <div class="tips-title">
+                <i class="fas fa-lightbulb"></i>
+                <h3>Smart Water Saving Tips for {{ category.title() }}</h3>
+            </div>
+            {% for activity, tip in tips.items() %}
+            <div class="tip-item">
+                <i class="fas fa-check-circle tip-icon"></i>
+                <div class="tip-content">
+                    <div class="tip-activity">{{ activity }}</div>
+                    <div>{{ tip }}</div>
+                </div>
+            </div>
+            {% endfor %}
+            
+            <!-- General Tips -->
+            <div class="tip-item">
+                <i class="fas fa-star tip-icon"></i>
+                <div class="tip-content">
+                    <div class="tip-activity">General Tips</div>
+                    <div>Always turn off taps when not in use, fix leaks immediately, and consider installing water-efficient fixtures.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Add animation to activity cards
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.activity-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+
+        // Efficiency option selection
+        function toggleEfficiency(element, inputName) {
+            const checkbox = element.querySelector('input[type="checkbox"]');
+            checkbox.checked = !checkbox.checked;
+            
+            if (checkbox.checked) {
+                element.classList.add('selected');
+            } else {
+                element.classList.remove('selected');
+            }
+        }
+
+        // Auto-calculate suggestions
+        document.querySelectorAll('input[name$="_qty"]').forEach(input => {
+            input.addEventListener('blur', function() {
+                const activityCard = this.closest('.activity-card');
+                const activityName = activityCard.querySelector('.activity-name').textContent;
+                const quantity = parseFloat(this.value) || 0;
+                
+                if (quantity > 0) {
+                    showWaterSavingTip(activityName, quantity, activityCard);
+                }
+            });
+        });
+
+        function showWaterSavingTip(activity, quantity, card) {
+            const tips = {
+                'Shower': `A ${quantity}-minute shower uses about ${quantity * 9}L. Try reducing to 5 minutes to save ${(quantity - 5) * 9}L!`,
+                'Bath': `Consider taking a shower instead to save up to 50L of water.`,
+                'Car Washing': `Using a bucket instead of a hose can save up to 100L per wash.`,
+                'Gardening': `Water plants in early morning to reduce evaporation by 30%.`,
+                'Dish Washing': `Using a basin can save up to 15L compared to running water.`
+            };
+            
+            if (tips[activity]) {
+                // Remove existing tip if any
+                const existingTip = card.querySelector('.auto-tip');
+                if (existingTip) {
+                    existingTip.remove();
+                }
+                
+                const tipElement = document.createElement('div');
+                tipElement.className = 'auto-tip';
+                tipElement.innerHTML = `
+                    <div style="background: #e3f2fd; padding: 10px; border-radius: 8px; margin-top: 10px; border-left: 4px solid #2196f3;">
+                        <strong>💡 Tip:</strong> ${tips[activity]}
+                    </div>
+                `;
+                
+                card.querySelector('.form-section').appendChild(tipElement);
+            }
+        }
+
+        // Form validation
+        document.querySelector('form').addEventListener('submit', function(e) {
+            let hasData = false;
+            document.querySelectorAll('input[name$="_qty"]').forEach(input => {
+                if (input.value.trim() !== '') {
+                    hasData = true;
+                }
+            });
+            
+            if (!hasData) {
+                e.preventDefault();
+                alert('Please fill in at least one activity to calculate your water footprint.');
+            }
+        });
+    </script>
+</body>
+</html>

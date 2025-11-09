@@ -316,10 +316,18 @@
             <h2>Total Water Used: {{total|round(1)}} L</h2>
         </div>
 
+        {% if badges %}
         <div class="badge-card">
             <i class="fas fa-trophy badge-icon"></i>
-            <div class="badge-text">Badge Earned: {{badge}}</div>
+            <div class="badge-text">
+                {% if badges|length > 0 %}
+                Badges Earned: {{ badges|length }}
+                {% else %}
+                Keep tracking to earn badges!
+                {% endif %}
+            </div>
         </div>
+        {% endif %}
 
         <div class="tips-card">
             <h3>
@@ -337,7 +345,7 @@
         </div>
 
         <div class="btn-container">
-            <a href="/" class="btn">
+            <a href="/index" class="btn">
                 <i class="fas fa-arrow-left"></i>
                 Go Back
             </a>
